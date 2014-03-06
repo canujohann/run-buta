@@ -556,9 +556,7 @@ public class MainScene extends KeyListenScene implements
 								
 								// アニメーション開始
 								zombieSprite.setAlpha(1.0f);
-								zombieSprite.animate(100);
-								
-									
+								zombieSprite.animate(100);			
 								
 							}
 						});
@@ -581,7 +579,7 @@ public class MainScene extends KeyListenScene implements
 		}
 		
 		
-		if (zombieCount < 5) {		
+		if (zombieCount < 5) {
 			
 			AnimatedSprite bad = getABadGuy();
 			
@@ -618,21 +616,18 @@ public class MainScene extends KeyListenScene implements
 		}));
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
+	/* 敵を生成 */
 	private AnimatedSprite getABadGuy(){
 		
 		AnimatedSprite zombieSprite;
 		int r = (int) (Math.random() * 10);
 		
 		if (r > 7) {
-			// rapide
+			// 速いやつ
 			zombieSprite = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher2.png", 1, 2);
 			zombieSprite.setTag(TAG_ZOMBIE_FIX_02);
 		} else  {
-			// lent
+			// 遅いやつ
 			zombieSprite = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher.png", 1, 2);
 			zombieSprite.setTag(TAG_ZOMBIE_FIX_01);
 		} 
@@ -640,7 +635,8 @@ public class MainScene extends KeyListenScene implements
 		return zombieSprite;
 	}
 	
-	// アイテムを一個出現
+	
+	/* アイテムを一個出現 */
 	public void showNewWeapon() {
 
 		// アイテム用Sprite
@@ -957,7 +953,7 @@ public class MainScene extends KeyListenScene implements
 
 		ButtonSprite btnRetry = getBaseActivity().getResourceUtil()
 				.getButtonSprite("result_btn_02.png", "result_btn_02.png");
-		btnRetry.setPosition(100, 265);
+		btnRetry.setPosition(10, 225);
 		btnRetry.setTag(MENU_RETRY);
 		btnRetry.setOnClickListener(this);
 		resultBg.attachChild(btnRetry);
@@ -965,7 +961,8 @@ public class MainScene extends KeyListenScene implements
 
 		ButtonSprite btnTweet = getBaseActivity().getResourceUtil()
 				.getButtonSprite("result_btn_03.png", "result_btn_03.png");
-		btnTweet.setPosition(265, 265);
+		btnTweet.setPosition(getBaseActivity().getEngine().getCamera()
+				.getWidth()	/ 2.0f - (btnTweet.getWidth()/2), 225);
 		btnTweet.setTag(MENU_RANKING);
 		btnTweet.setOnClickListener(this);
 		resultBg.attachChild(btnTweet);
@@ -973,7 +970,8 @@ public class MainScene extends KeyListenScene implements
 
 		ButtonSprite btnMenu = getBaseActivity().getResourceUtil()
 				.getButtonSprite("result_btn_04.png", "result_btn_04.png");
-		btnMenu.setPosition(590, 265);
+		btnMenu.setPosition(getBaseActivity().getEngine().getCamera()
+				.getWidth()-btnMenu.getWidth()-10, 225);
 		btnMenu.setTag(MENU_MENU);
 		btnMenu.setOnClickListener(this);
 		resultBg.attachChild(btnMenu);
@@ -1000,6 +998,7 @@ public class MainScene extends KeyListenScene implements
 		attachChild(pauseBg);
 
 		try {
+			
 			ButtonSprite btnMenu = getBaseActivity()
 					.getResourceUtil()
 					.getButtonSprite("result_btn_05.png", "result_btn_05.png");

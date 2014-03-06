@@ -4,8 +4,11 @@ import java.util.ArrayList;
 
 import org.andengine.ui.activity.SimpleLayoutGameActivity;
 
+import android.os.Bundle;
+
 import com.canujohann.scenes.KeyListenScene;
 import com.canujohann.utils.ResourceUtil;
+import com.swarmconnect.Swarm;
 
 public abstract class MultiSceneActivity extends SimpleLayoutGameActivity {
 
@@ -36,4 +39,23 @@ public abstract class MultiSceneActivity extends SimpleLayoutGameActivity {
 
 	// シーンとシーン格納配列を更新する関数
 	public abstract void refreshRunningScene(KeyListenScene scene);
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+	    super.onCreate(savedInstanceState);
+	    Swarm.setActive(this);
+	}
+
+	@Override
+	public void onResume() {
+	    super.onResume();
+	    Swarm.setActive(this);
+	   
+	}
+
+	@Override
+	public void onPause() {
+	    super.onPause();
+	    Swarm.setInactive(this);
+	}
 }

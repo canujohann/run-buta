@@ -19,7 +19,10 @@ import android.content.Intent;
 import android.view.KeyEvent;
 
 import com.canujohann.activities.MultiSceneActivity;
+import com.canujohann.utils.Consts;
 import com.canujohann.utils.ResourceUtil;
+import com.swarmconnect.Swarm;
+import com.swarmconnect.SwarmLeaderboard;
 
 /**
  * 
@@ -135,6 +138,8 @@ public class InitialScene extends KeyListenScene implements
 		//update after 3 seconds
 		registerUpdateHandler(new TimerHandler(5f, false, (ITimerCallback) this));
 		
+		Swarm.enableAlternativeMarketCompatability();
+		Swarm.init(getBaseActivity(), Consts.SWARM_APP_ID, Consts.SWARM_APP_KEY);	
 		
 	}
 
@@ -182,19 +187,10 @@ public class InitialScene extends KeyListenScene implements
 			break;
 			
 		
-		case INITIAL_RANKING:		//ランキングを表示
-			Intent it = new Intent(Intent.ACTION_SEND);
-			it.putExtra(Intent.EXTRA_EMAIL,
-					new String[] { "2chandroid@gmail.com" });
-			it.putExtra(Intent.EXTRA_TEXT,
-					"Type anything you think about this game! Thanks!");
-			it.putExtra(Intent.EXTRA_SUBJECT, "[Feedback]About Zombie Gravity");
-			it.setType("message/rfc822");
-			getBaseActivity().startActivity(
-					Intent.createChooser(it, "Choose Email Client"));
-
-			break;
-				
+		case INITIAL_RANKING:		//ランキングを表示			
+			//SwarmLeaderboard.submitScore(14032, 200);
+			SwarmLeaderboard.showLeaderboard(Consts.LEADERBOARD_ID);
+			break;				
 		}
 	}
 	
