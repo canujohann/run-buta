@@ -66,7 +66,6 @@ public class MainScene extends KeyListenScene implements
 
 	// ボタン用タグ
 	private static final int MENU_MENU = 21;
-	private static final int MENU_TWEET = 22;
 	private static final int MENU_RANKING = 23;
 	private static final int MENU_RETRY = 24;
 	private static final int MENU_RESUME = 25;
@@ -955,13 +954,6 @@ public class MainScene extends KeyListenScene implements
 		resultBg.attachChild(resultText);
 
 		// ボタン類
-		ButtonSprite btnRanking = getBaseActivity().getResourceUtil()
-				.getButtonSprite("result_btn_01.png", "result_btn_01.png");
-		placeToCenterX(btnRanking, 175);
-		btnRanking.setTag(MENU_RANKING);
-		btnRanking.setOnClickListener(this);
-		resultBg.attachChild(btnRanking);
-		registerTouchArea(btnRanking);
 
 		ButtonSprite btnRetry = getBaseActivity().getResourceUtil()
 				.getButtonSprite("result_btn_02.png", "result_btn_02.png");
@@ -974,7 +966,7 @@ public class MainScene extends KeyListenScene implements
 		ButtonSprite btnTweet = getBaseActivity().getResourceUtil()
 				.getButtonSprite("result_btn_03.png", "result_btn_03.png");
 		btnTweet.setPosition(265, 265);
-		btnTweet.setTag(MENU_TWEET);
+		btnTweet.setTag(MENU_RANKING);
 		btnTweet.setOnClickListener(this);
 		resultBg.attachChild(btnTweet);
 		registerTouchArea(btnTweet);
@@ -1153,15 +1145,13 @@ public class MainScene extends KeyListenScene implements
 		case MENU_MENU:
 			getBaseActivity().backToInitial();
 			break;
-		case MENU_TWEET:
+		case MENU_RANKING:
 			Intent sendIntent = new Intent(Intent.ACTION_SEND);
 			sendIntent.setType("text/plain");
 			sendIntent.putExtra(Intent.EXTRA_TEXT,
 					"Androidゲーム「Zombie Gravity」で" + currentScore
 							+ "点獲得！かかってこいや！ → " + "http://bit.ly/SrpS46");
 			getBaseActivity().startActivity(sendIntent);
-			break;
-		case MENU_RANKING:
 			break;
 		}
 	}

@@ -27,13 +27,12 @@ import com.canujohann.utils.ResourceUtil;
  *
  */
 public class InitialScene extends KeyListenScene implements
-		ButtonSprite.OnClickListener /*, ITimerCallback*/ {
+		ButtonSprite.OnClickListener , ITimerCallback {
 
 	
 	//button tags
 	private static final int INITIAL_START = 1;
 	private static final int INITIAL_RANKING = 2;
-	private static final int INITIAL_FEEDBACK = 3;
 	private static final int DISTANCE_BETWEEN_TWO = 100;
 	
 
@@ -115,31 +114,11 @@ public class InitialScene extends KeyListenScene implements
 				new DelayModifier(1.6f), new MoveModifier(1.0f, btnRanking
 						.getX(), btnX, btnRanking.getY(), btnRanking.getY(),
 						EaseBackInOut.getInstance())));
-
-		//SNSボタン設定
-		ButtonSprite btnRecommend = getBaseActivity().getResourceUtil()
-				.getButtonSprite("button3.png", "button3_p.png");
-		placeToCenterX(btnRecommend, 360);
-		btnRecommend.setTag(INITIAL_FEEDBACK);
-		btnRecommend.setOnClickListener(this);
-		attachChild(btnRecommend);
-		registerTouchArea(btnRecommend);
-
-		//SNSボタンのアニメーションV
-		btnX = btnRecommend.getX();
-		btnRecommend.setPosition(btnRecommend.getX()
-				+ getBaseActivity().getEngine().getCamera().getWidth(),
-				btnRecommend.getY());
-		btnRecommend.registerEntityModifier(new SequenceEntityModifier(
-				new DelayModifier(1.8f), new MoveModifier(1.0f, btnRecommend
-						.getX(), btnX, btnRecommend.getY(),
-						btnRecommend.getY(), EaseBackInOut.getInstance())));
-		
 		
 		/*
 		 * 豚を追いかけるやつの処理
 		 */
-		/*
+		
 		float cameraY = getBaseActivity().getEngine().getCamera().getHeight();	
 		float cameraX = getBaseActivity().getEngine().getCamera().getWidth();
 
@@ -150,14 +129,12 @@ public class InitialScene extends KeyListenScene implements
 
 		cuisinier = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher.png", 1, 2);
 		cuisinier.setPosition(cameraX + cuisinier.getWidth() + DISTANCE_BETWEEN_TWO , cochon.getY());
-		//cuisinier.setPosition(100f,100f);
 		cuisinier.setZIndex(3);
-		//cuisinier.setRotation(90);
 		attachChild(cuisinier);
 
 		//update after 3 seconds
-		registerUpdateHandler(new TimerHandler(5f, false, this));
-		*/
+		registerUpdateHandler(new TimerHandler(5f, false, (ITimerCallback) this));
+		
 		
 	}
 
@@ -206,12 +183,6 @@ public class InitialScene extends KeyListenScene implements
 			
 		
 		case INITIAL_RANKING:		//ランキングを表示
-			break;
-		
-			
-			
-		case INITIAL_FEEDBACK:		//スコアを共有する
-			
 			Intent it = new Intent(Intent.ACTION_SEND);
 			it.putExtra(Intent.EXTRA_EMAIL,
 					new String[] { "2chandroid@gmail.com" });
@@ -221,7 +192,9 @@ public class InitialScene extends KeyListenScene implements
 			it.setType("message/rfc822");
 			getBaseActivity().startActivity(
 					Intent.createChooser(it, "Choose Email Client"));
+
 			break;
+				
 		}
 	}
 	
@@ -229,17 +202,17 @@ public class InitialScene extends KeyListenScene implements
 	/**
 	* method pour les timercallback
 	*/
-//	@Override
-//	public void onTimePassed(TimerHandler pTimerHandler) {	
-//		
-//		MoveXModifier moveUpModifier  = new MoveXModifier(5, cochon.getX(), - cochon.getWidth() - DISTANCE_BETWEEN_TWO);	
-//		MoveXModifier moveUpModifier2 = new MoveXModifier(5, cuisinier.getX(), -cuisinier.getWidth());
-//		
-//		cochon.animate(200);
-//		cuisinier.animate(200);
-//		
-//		cochon.registerEntityModifier(moveUpModifier);
-//		cuisinier.registerEntityModifier(moveUpModifier2);
-//	}
+	@Override
+	public void onTimePassed(TimerHandler pTimerHandler) {	
+		
+		MoveXModifier moveUpModifier  = new MoveXModifier(5, cochon.getX(), - cochon.getWidth() - DISTANCE_BETWEEN_TWO);	
+		MoveXModifier moveUpModifier2 = new MoveXModifier(5, cuisinier.getX(), -cuisinier.getWidth());
+		
+		cochon.animate(200);
+		cuisinier.animate(200);
+		
+		cochon.registerEntityModifier(moveUpModifier);
+		cuisinier.registerEntityModifier(moveUpModifier2);
+	}
 
 }

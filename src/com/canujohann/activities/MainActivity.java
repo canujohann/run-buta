@@ -9,8 +9,6 @@ import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
 
 import com.canujohann.R;
-import com.canujohann.R.id;
-import com.canujohann.R.layout;
 import com.canujohann.scenes.InitialScene;
 import com.canujohann.scenes.KeyListenScene;
 import com.canujohann.scenes.MainScene;
