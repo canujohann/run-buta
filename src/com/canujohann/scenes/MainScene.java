@@ -40,8 +40,11 @@ import org.andengine.util.modifier.ease.EaseBackIn;
 import org.andengine.util.modifier.ease.EaseQuadOut;
 
 import com.canujohann.activities.MultiSceneActivity;
+import com.canujohann.utils.Consts;
 import com.canujohann.utils.ResourceUtil;
 import com.canujohann.utils.SPUtil;
+import com.swarmconnect.Swarm;
+import com.swarmconnect.SwarmLeaderboard;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -690,21 +693,14 @@ public class MainScene extends KeyListenScene implements
 		Sprite[] listWalls = new Sprite[nb];
 		
 		for(int i=0; i< nb; i++){
-			
-			int r = (int) (Math.random() * 10);
-			
+						
 			//偶数を使って、spriteを定義
-			if (r == 0) {
-				listWalls[i] = getBaseActivity().getResourceUtil().getSprite("wall.png");
-			}else{
-				listWalls[i] = getBaseActivity().getResourceUtil().getSprite("wall.png");
-			}
-			
+			listWalls[i] = getBaseActivity().getResourceUtil().getSprite("wall.png");
+						
 			//xY設定
 			int x = (int) (Math.random() * (getBaseActivity().getEngine().getCamera().getWidth() - listWalls[i].getWidth()));
 			int y = (int) (Math.random() * (getBaseActivity().getEngine().getCamera().getHeight() - listWalls[i].getHeight()));
-			
-			
+						
 			listWalls[i].setZIndex(zIndexItem);
 			listWalls[i].setPosition(x, y);
 			listWalls[i].setRotation((float)(Math.random())* 360.0f);
@@ -736,7 +732,7 @@ public class MainScene extends KeyListenScene implements
 			weapon01Sound.play();
 			
 
-			//affichage de la flamme
+			//animation
 			final Sprite weaponSprite = new Sprite(0, 0, weaponTextureArray[0],	getBaseActivity().getVertexBufferObjectManager());
 			weaponSprite.setPosition(boySprite.getX() + boySprite.getWidth()/ 2 - weaponSprite.getWidth() / 2, boySprite.getY()
 					+ boySprite.getHeight() / 2 - weaponSprite.getHeight() / 2);
@@ -748,11 +744,11 @@ public class MainScene extends KeyListenScene implements
 
 			weaponSpriteArray.add(weaponSprite);
 
-			//fadein fadeout rapidement
+			//fadein-fadeout
 			weaponSprite.registerEntityModifier(new SequenceEntityModifier(
 					new FadeInModifier(0.2f), new FadeOutModifier(0.7f)));
 
-			//after 1sec, detach
+			//after 1sec
 			registerUpdateHandler(new TimerHandler(1, new ITimerCallback() {
 				public void onTimePassed(TimerHandler pTimerHandler) {
 					weaponSprite.detachSelf();
@@ -959,14 +955,14 @@ public class MainScene extends KeyListenScene implements
 		resultBg.attachChild(btnRetry);
 		registerTouchArea(btnRetry);
 
-		ButtonSprite btnTweet = getBaseActivity().getResourceUtil()
+		ButtonSprite btnScore = getBaseActivity().getResourceUtil()
 				.getButtonSprite("result_btn_03.png", "result_btn_03.png");
-		btnTweet.setPosition(getBaseActivity().getEngine().getCamera()
-				.getWidth()	/ 2.0f - (btnTweet.getWidth()/2), 225);
-		btnTweet.setTag(MENU_RANKING);
-		btnTweet.setOnClickListener(this);
-		resultBg.attachChild(btnTweet);
-		registerTouchArea(btnTweet);
+		btnScore.setPosition(getBaseActivity().getEngine().getCamera()
+				.getWidth()	/ 2.0f - (btnScore.getWidth()/2), 225);
+		btnScore.setTag(MENU_RANKING);
+		btnScore.setOnClickListener(this);
+		resultBg.attachChild(btnScore);
+		registerTouchArea(btnScore);
 
 		ButtonSprite btnMenu = getBaseActivity().getResourceUtil()
 				.getButtonSprite("result_btn_04.png", "result_btn_04.png");
@@ -1144,13 +1140,10 @@ public class MainScene extends KeyListenScene implements
 		case MENU_MENU:
 			getBaseActivity().backToInitial();
 			break;
-		case MENU_RANKING:
-			Intent sendIntent = new Intent(Intent.ACTION_SEND);
-			sendIntent.setType("text/plain");
-			sendIntent.putExtra(Intent.EXTRA_TEXT,
-					"Androidゲーム「Zombie Gravity」で" + currentScore
-							+ "点獲得！かかってこいや！ → " + "http://bit.ly/SrpS46");
-			getBaseActivity().startActivity(sendIntent);
+		case MENU_RANKING:			
+			Swarm.enableAlternativeMarketCompatability();
+			Swarm.init(getBaseActivity(), Consts.SWARM_APP_ID, Consts.SWARM_APP_KEY);
+			SwarmLeaderboard.submitScore(Consts.LEADERBOARD_ID, (int)currentScore);			
 			break;
 		}
 	}

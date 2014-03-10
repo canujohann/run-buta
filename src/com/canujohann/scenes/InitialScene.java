@@ -138,9 +138,6 @@ public class InitialScene extends KeyListenScene implements
 		//update after 3 seconds
 		registerUpdateHandler(new TimerHandler(5f, false, (ITimerCallback) this));
 		
-		Swarm.enableAlternativeMarketCompatability();
-		Swarm.init(getBaseActivity(), Consts.SWARM_APP_ID, Consts.SWARM_APP_KEY);	
-		
 	}
 
 	
@@ -189,6 +186,8 @@ public class InitialScene extends KeyListenScene implements
 		
 		case INITIAL_RANKING:		//ランキングを表示			
 			//SwarmLeaderboard.submitScore(14032, 200);
+			Swarm.enableAlternativeMarketCompatability();
+			Swarm.init(getBaseActivity(), Consts.SWARM_APP_ID, Consts.SWARM_APP_KEY);	
 			SwarmLeaderboard.showLeaderboard(Consts.LEADERBOARD_ID);
 			break;				
 		}
