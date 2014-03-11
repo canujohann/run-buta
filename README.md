@@ -11,6 +11,7 @@ I’ve tried to develop a very basic game based on the AndEgine framework. Score
 2. Clone AndEgine and import it as library 
 3. Create a Swarm account 
 4. Download Swarm and import it as library
+5. Set your Swarm info (/src/com/canujohann/utils/Consts.java)
 
 I've first developed this game for my Japanese colleagues, so all comments are in Japanese… I will try to translate it before the end of march ! Thank you for your patience !
 
