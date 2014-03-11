@@ -53,17 +53,16 @@ import android.view.KeyEvent;
 public class MainScene extends KeyListenScene implements
 		ButtonSprite.OnClickListener {
 
-	// ゾンビ用タグ
-	private static final int TAG_ZOMBIE_01 = 1;
-	private static final int TAG_ZOMBIE_02 = 2;
-	private static final int TAG_ZOMBIE_FIX_01 = -1;
-	private static final int TAG_ZOMBIE_FIX_02 = -2;
+	// 敵タグ
+	private static final int TAG_BUTCHER_01 = 1;
+	private static final int TAG_BUTCHER_02 = 2;
+	private static final int TAG_BUTCHER_FIX_01 = -1;
+	private static final int TAG_BUTCHER_FIX_02 = -2;
 	
+	//障害物（倒れた木）
 	private static final int WALL_NB = 2;
 
-
-
-	// アイテム用タグ
+	// 爆弾タグ
 	private static final int TAG_ITEM_01 = 11;
 	private static final int TAG_ITEM_02 = 12;
 
@@ -73,23 +72,20 @@ public class MainScene extends KeyListenScene implements
 	private static final int MENU_RETRY = 24;
 	private static final int MENU_RESUME = 25;
 
-	// 主人公
-	private AnimatedSprite boySprite, boyFirst;
-	// 主人公のz-index
-	private int zIndexBoy = 2;
+	// 子豚君
+	private AnimatedSprite porcSprite, porcFirst;
+	// 子豚のz-index
+	private int zIndexPorc = 2;
 	// 攻撃アイテムのz-index
 	private int zIndexItem = 1;
 	// ゲームオーバー画面のz-index
 	private int zIndexGameOverLayer = 3;
 	// 主人公が移動する先の座標を保持
-	private float boyNewX;
-	private float boyNewY;
-
-	// ゾンビ出現穴の配列
-	//private ArrayList<Sprite> holeArray;
-	// 出現済みゾンビの配列
-	private ArrayList<AnimatedSprite> zombieArray;
-	private AnimatedSprite zombieFirst ;
+	private float porcNewX;
+	private float porcNewY;
+	// 出現済み敵の配列
+	private ArrayList<AnimatedSprite> butchersArray;
+	private AnimatedSprite butcherFirst ;
 	// 攻撃アイテムの配列
 	private ArrayList<AnimatedSprite> itemArray;
 	//wall配列
@@ -98,28 +94,24 @@ public class MainScene extends KeyListenScene implements
 	private TextureRegion[] weaponTextureArray;
 	// コンボ表示用フォント
 	private BitmapFont[] comboBMFontArray;
-
 	// ゲームオーバーか否かのフラグ
 	private boolean isGameOver;
 	// ポーズ中か否かのフラグ
 	private boolean isPaused;
 	// ポーズ画面の背景
 	private Rectangle pauseBg;
-
 	// 現在のスコアを表示するテキスト
 	private Text currentScoreText;
 	// 過去最高のスコアを表示するテキスト
 	private Text highScoreText;
 	// 現在のスコア
 	private long currentScore;
-
 	// 遊び方画面
 	private Sprite instructionSprite;
 	// 遊び方画面のボタン
 	private ButtonSprite instructionBtn;
 	// 遊び方画面が出ているかどうか
 	private boolean isHelpVisible;
-	
 	boolean hasContactWithWall;
 	float[] previousPosition = new float[2];
 
@@ -127,8 +119,7 @@ public class MainScene extends KeyListenScene implements
 	private Sound btnPressedSound;
 	private Sound weapon01Sound;
 	private Sound weapon02Sound;
-	private Sound weapon03Sound;
-	private Sound zombieAppearSound;
+	private Sound butcherAppearSound;
 	private Sound gameoverSound;
 	private Sound comboSound;
 	
@@ -141,25 +132,23 @@ public class MainScene extends KeyListenScene implements
 
 	public void init() {
 		
-
 		wallArray = new ArrayList<Sprite>();
 		
 		attachChild(getBaseActivity().getResourceUtil().getSprite("herbe.png"));
 
 		//pig first
-		boySprite = getBaseActivity().getResourceUtil().getAnimatedSprite("buta2.png", 1, 2);
+		porcSprite = getBaseActivity().getResourceUtil().getAnimatedSprite("buta2.png", 1, 2);
 		
-		boyFirst = getBaseActivity().getResourceUtil().getAnimatedSprite("buta2.png", 1, 2);
-		boyFirst.setVisible(false);
+		porcFirst = getBaseActivity().getResourceUtil().getAnimatedSprite("buta2.png", 1, 2);
+		porcFirst.setVisible(false);
 		
-		placeToCenter(boySprite);
-		attachChild(boySprite);
-		boySprite.animate(200);
-		boySprite.setZIndex(zIndexBoy);
+		placeToCenter(porcSprite);
+		attachChild(porcSprite);
+		porcSprite.animate(200);
+		porcSprite.setZIndex(zIndexPorc);
 		
-		
-		zombieFirst = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher2.png", 1, 2);
-		zombieFirst.setVisible(false);
+		butcherFirst = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher2.png", 1, 2);
+		butcherFirst.setVisible(false);
 		
 		// スコア表示
 		currentScore = 0;
@@ -183,9 +172,8 @@ public class MainScene extends KeyListenScene implements
 		attachChild(highScoreText);
 
 		// 配列の初期化
-		zombieArray = new ArrayList<AnimatedSprite>();
+		butchersArray = new ArrayList<AnimatedSprite>();
 		itemArray = new ArrayList<AnimatedSprite>();
-
 		
 		/*
 		 * 処理が重くならないように
@@ -195,7 +183,6 @@ public class MainScene extends KeyListenScene implements
 		for (int i = 0; i < 3; i++) {
 			weaponTextureArray[i] = (TextureRegion) getBaseActivity().getResourceUtil().getSprite("weapon_0" + (i + 1) + ".png").getTextureRegion();
 		}
-		
 		
 		// コンボ表示用フォントを初期化
 		comboBMFontArray = new BitmapFont[3];
@@ -213,7 +200,6 @@ public class MainScene extends KeyListenScene implements
 			showNewZombie();	// 適を出現させる
 			showNewWeapon();	// 攻撃アイテムを出現させる
 			showWalls(WALL_NB);
-			
 			isHelpVisible = false;
 		} else {
 			isHelpVisible = true;
@@ -227,12 +213,12 @@ public class MainScene extends KeyListenScene implements
 	 */
 	public void showHelp() {
 		
-		//main image for help
+		//ヘルプ画面
 		instructionSprite = ResourceUtil.getInstance(getBaseActivity()).getSprite("instruction.png");
 		placeToCenter(instructionSprite);
 		attachChild(instructionSprite);
 
-		// help button to click
+		//ヘルプ画面：ボタン
 		instructionBtn = ResourceUtil.getInstance(getBaseActivity()).getButtonSprite("instruction_btn.png", "instruction_btn_p.png");
 		placeToCenterX(instructionBtn, 380);
 		attachChild(instructionBtn);
@@ -244,12 +230,12 @@ public class MainScene extends KeyListenScene implements
 				
 				isHelpVisible = false;
 				
-				//on supprime les elements inutiles
+				//不要なものを削除
 				instructionSprite.detachSelf();
 				instructionBtn.detachSelf();
 				unregisterTouchArea(instructionBtn);
 
-				// ゾンビを出現させる
+				//敵を出現させる
 				showNewZombie();
 				
 				// 攻撃アイテムを出現させる
@@ -267,28 +253,12 @@ public class MainScene extends KeyListenScene implements
 		
 		// 効果音をロード
 		try {
-			btnPressedSound = SoundFactory.createSoundFromAsset(
-					getBaseActivity().getSoundManager(), getBaseActivity(),
-					"door03.wav");
-			weapon01Sound = SoundFactory.createSoundFromAsset(getBaseActivity()
-					.getSoundManager(), getBaseActivity(), "burst00.wav");
-			;
-			weapon02Sound = SoundFactory.createSoundFromAsset(getBaseActivity()
-					.getSoundManager(), getBaseActivity(), "freeze03.wav");
-			;
-			weapon03Sound = SoundFactory.createSoundFromAsset(getBaseActivity()
-					.getSoundManager(), getBaseActivity(), "crash20_a.wav");
-			;
-			zombieAppearSound = SoundFactory.createSoundFromAsset(
-					getBaseActivity().getSoundManager(), getBaseActivity(),
-					"buble00.wav");
-			;
-			gameoverSound = SoundFactory.createSoundFromAsset(getBaseActivity()
-					.getSoundManager(), getBaseActivity(), "gara00.wav");
-			;
-			comboSound = SoundFactory.createSoundFromAsset(getBaseActivity()
-					.getSoundManager(), getBaseActivity(), "pyoro62.wav");
-			;
+			btnPressedSound = SoundFactory.createSoundFromAsset(getBaseActivity().getSoundManager(), getBaseActivity(),"door03.wav");
+			weapon01Sound = SoundFactory.createSoundFromAsset(getBaseActivity().getSoundManager(), getBaseActivity(), "burst00.wav");
+			weapon02Sound = SoundFactory.createSoundFromAsset(getBaseActivity().getSoundManager(), getBaseActivity(), "freeze03.wav");
+			butcherAppearSound = SoundFactory.createSoundFromAsset(getBaseActivity().getSoundManager(), getBaseActivity(),"buble00.wav");
+			gameoverSound = SoundFactory.createSoundFromAsset(getBaseActivity().getSoundManager(), getBaseActivity(), "gara00.wav");
+			comboSound = SoundFactory.createSoundFromAsset(getBaseActivity().getSoundManager(), getBaseActivity(), "pyoro62.wav");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -296,7 +266,6 @@ public class MainScene extends KeyListenScene implements
 
 	/*
 	 * 『戻る』ボタン押下
-	 * (non-Javadoc)
 	 * @see com.canujohann.scenes.KeyListenScene#dispatchKeyEvent(android.view.KeyEvent)
 	 */
 	@Override
@@ -308,7 +277,7 @@ public class MainScene extends KeyListenScene implements
 				return false;
 			}
 			
-			//if pause, we stop pause
+			//ストップ状態
 			if (isPaused) {
 				
 				// detach系のメソッドは別スレッドで
@@ -331,7 +300,7 @@ public class MainScene extends KeyListenScene implements
 				return false;
 			}
 			
-			//menu
+		//メニュボタン
 		} else if (e.getAction() == KeyEvent.ACTION_DOWN && e.getKeyCode() == KeyEvent.KEYCODE_MENU) {
 			
 			// ポーズ中でなければポーズ画面を出す
@@ -363,120 +332,110 @@ public class MainScene extends KeyListenScene implements
 		currentScore++;
 		currentScoreText.setText("Score " + currentScore);
 
-		// 傾きが0ならば何もしない
+		// 傾きが0だったら何もしない
 		if ((velX != 0) || (velY != 0)) {
-			
 			
 			// 移動の上限、下限を設定
 			int minX = 0;
 			int minY = 0;
-			int maxX = (int) getBaseActivity().getEngine().getCamera().getWidth()	- (int) boySprite.getWidth();
-			int maxY = (int) getBaseActivity().getEngine().getCamera().getHeight() - (int) boySprite.getHeight();
+			int maxX = (int) getBaseActivity().getEngine().getCamera().getWidth()	- (int) porcSprite.getWidth();
+			int maxY = (int) getBaseActivity().getEngine().getCamera().getHeight() - (int) porcSprite.getHeight();
 
 			// 移動
-			if (boyNewX >= minX) {
-				boyNewX += velX;
+			if (porcNewX >= minX) {
+				porcNewX += velX;
 			} else {
-				boyNewX = minX;
+				porcNewX = minX;
 			}
-			if (boyNewX <= maxX) {
-				boyNewX += velX;
+			if (porcNewX <= maxX) {
+				porcNewX += velX;
 			} else {
-				boyNewX = maxX;
+				porcNewX = maxX;
 			}
-			if (boyNewY >= minY) {
-				boyNewY += velY;
+			if (porcNewY >= minY) {
+				porcNewY += velY;
 			} else {
-				boyNewY = minY;
+				porcNewY = minY;
 			}
-			if (boyNewY <= maxY) {
-				boyNewY += velY;
+			if (porcNewY <= maxY) {
+				porcNewY += velY;
 			} else {
-				boyNewY = maxY;
+				porcNewY = maxY;
 			}
 
 			// 移動前の座標
-			float[] currentXY = { boySprite.getX(), boySprite.getY() };
+			float[] currentXY = { porcSprite.getX(), porcSprite.getY() };
 			
 			/*
-			 * check before moving if collides with wall
-			 * we don't move the real pig, only the one hidden (boyFirst)
+			 * 移動させる前に、障害物と衝突しないか確認
+			 * 子豚じゃなくて、もう一個のやつを動かして、衝突を判断 (porcFirst)
 			 */
 			hasContactWithWall = false;
-			boyFirst.setPosition(boyNewX, boyNewY);
+			porcFirst.setPosition(porcNewX, porcNewY);
 			
 			if(wallArray!= null){
 				for(int j=0; j<wallArray.size(); j ++){
-					if(boyFirst.collidesWith(wallArray.get(j))){
+					if(porcFirst.collidesWith(wallArray.get(j))){
 							hasContactWithWall=true;
-							break;
-//						}						
-						
+							break;	
 					}
 				}
 			}
 			
 			
-			/*
-			 * If no collision with wall, we move pig
-			 * if collision, no move
-			 */
+			/* 衝突しねかれば、移動　*/
 			if(!hasContactWithWall){
-				
-				boySprite.setPosition(boyNewX, boyNewY);
+	
+				porcSprite.setPosition(porcNewX, porcNewY);
 				
 				// 移動後の座標
-				float[] destinationXY = { boySprite.getX(), boySprite.getY() };
+				float[] destinationXY = { porcSprite.getX(), porcSprite.getY() };
 	
 				// 壁にぶつかっている時等移動しない時には角度は変更しない
 				if (currentXY[0] != destinationXY[0] || currentXY[1] != destinationXY[1]) {
 					
 					// 移動前と移動後の座標の2点の角度を計算
 					double angle = getAngleByTwoPosition(currentXY, destinationXY);
-					boySprite.setRotation((float) angle);					
+					porcSprite.setRotation((float) angle);					
 				}
 				
 			}else{
-				boyFirst.setPosition(currentXY[0], currentXY[1]);
-				boyNewX = currentXY[0];
-				boyNewY = currentXY[1];
-			}
-			
-			
+				porcFirst.setPosition(currentXY[0], currentXY[1]);
+				porcNewX = currentXY[0];
+				porcNewY = currentXY[1];
+			}			
 		}
 		
 		
-		for (int i = 0; i < zombieArray.size(); i++) {
+		// 敵を移動させる
+		for (int i = 0; i < butchersArray.size(); i++) {
 			
-			AnimatedSprite zombie = zombieArray.get(i);
+			AnimatedSprite zombie = butchersArray.get(i);
 
-			if(zombie.getTag() != TAG_ZOMBIE_FIX_01 && zombie.getTag() != TAG_ZOMBIE_FIX_02){
+			if(zombie.getTag() != TAG_BUTCHER_FIX_01 && zombie.getTag() != TAG_BUTCHER_FIX_02){
 				
-					// ゾンビの種類によってスピードを変更する
+					// 敵の種類によってスピードを変更する
 					float[] zombieXY = { zombie.getX(), zombie.getY() };
-					float[] boyXY = { boySprite.getX(), boySprite.getY() };
+					float[] boyXY = { porcSprite.getX(), porcSprite.getY() };
 					
 					double angle = getAngleByTwoPosition(zombieXY, boyXY);
 	
 					// 移動距離と角度からx方向、y方向の移動量を求める
 					float distanceZombies = 0f;
-					if (zombie.getTag() == TAG_ZOMBIE_01) {
-						distanceZombies = 1.0f + (((zombieArray.size() - 1) - i) * 0.3f);
+					if (zombie.getTag() == TAG_BUTCHER_01) {
+						distanceZombies = 1.0f + (((butchersArray.size() - 1) - i) * 0.3f);
 					} else {
-						distanceZombies = 2.0f + (((zombieArray.size() - 1) - i) * 0.5f);
+						distanceZombies = 2.0f + (((butchersArray.size() - 1) - i) * 0.5f);
 					}
 	
 					float x = -(float) (distanceZombies * Math.cos(angle * Math.PI / 180.0));
 					float y = -(float) (distanceZombies * Math.sin(angle * Math.PI / 180.0));
 					
-					/*
-					 * 
-					 */
-					zombieFirst.setPosition(zombie.getX() + x, zombie.getY() + y);
+					butcherFirst.setPosition(zombie.getX() + x, zombie.getY() + y);
 					boolean hasContact = false;					
 					if(wallArray!= null){
 						for(int j=0; j<wallArray.size(); j ++){
-							if(zombieFirst.collidesWith(wallArray.get(j))){
+							if(butcherFirst.collidesWith(wallArray.get(j))){
 									hasContact=true;
 									break;								
 							}
@@ -485,16 +444,16 @@ public class MainScene extends KeyListenScene implements
 					
 
 					if(!hasContact){						
-						zombie.setPosition(zombieFirst.getX() , zombieFirst.getY());
+						zombie.setPosition(butcherFirst.getX() , butcherFirst.getY());
 						zombie.setRotation((float) angle);
 					}else{						
-						zombieFirst.setPosition(zombie.getX(), zombie.getY());						
+						butcherFirst.setPosition(zombie.getX(), zombie.getY());						
 					}
 											
-					if (zombie.collidesWith(boySprite)) {
+					if (zombie.collidesWith(porcSprite)) {
 	
-						float xDistance = zombie.getX() - boySprite.getX();
-						float yDistance = zombie.getY() - boySprite.getY();
+						float xDistance = zombie.getX() - porcSprite.getX();
+						float yDistance = zombie.getY() - porcSprite.getY();
 		
 						double distance = Math.sqrt(Math.pow(xDistance, 2)	+ Math.pow(yDistance, 2));
 						if (distance < 30) {
@@ -516,7 +475,7 @@ public class MainScene extends KeyListenScene implements
 			Sprite item = itemArray.get(i);
 
 			//when touching item
-			if (item.collidesWith(boySprite)) {
+			if (item.collidesWith(porcSprite)) {
 				
 				fireWeapon(item);
 				
@@ -529,26 +488,26 @@ public class MainScene extends KeyListenScene implements
 		
 	}
 
-	// ゾンビを一体出現
+	// 敵を一体出現
 	public void showNewZombie() {
 		
-		for (int i = 0; i < zombieArray.size(); i++) {
+		for (int i = 0; i < butchersArray.size(); i++) {
 			
 			
-			final AnimatedSprite zombieSprite = zombieArray.get(i);
+			final AnimatedSprite zombieSprite = butchersArray.get(i);
 			
 
-			if(zombieSprite.getTag() == TAG_ZOMBIE_FIX_01 || zombieSprite.getTag() == TAG_ZOMBIE_FIX_02){
+			if(zombieSprite.getTag() == TAG_BUTCHER_FIX_01 || zombieSprite.getTag() == TAG_BUTCHER_FIX_02){
 				
-				// 画面上に穴があれば2秒後にゾンビを出現させる
+				// 画面上に穴があれば2秒後に敵を出現させる
 				TimerHandler delayHandler = new TimerHandler(2.0f,	new ITimerCallback() {
 	
 							public void onTimePassed(TimerHandler pTimerHandler) {
 								
-								if(zombieSprite.getTag() == TAG_ZOMBIE_FIX_01){
-									zombieSprite.setTag(TAG_ZOMBIE_01);
+								if(zombieSprite.getTag() == TAG_BUTCHER_FIX_01){
+									zombieSprite.setTag(TAG_BUTCHER_01);
 								}else{
-									zombieSprite.setTag(TAG_ZOMBIE_02);
+									zombieSprite.setTag(TAG_BUTCHER_02);
 								}
 								
 								//Stop mouvement mougna-mougna
@@ -573,10 +532,10 @@ public class MainScene extends KeyListenScene implements
 		//敵の数
 		int zombieCount = 0;	
 		for (int i = 0; i < getChildCount(); i++) {
-			if (getChildByIndex(i).getTag() == TAG_ZOMBIE_01
-					|| getChildByIndex(i).getTag() == TAG_ZOMBIE_02
-					|| getChildByIndex(i).getTag() == TAG_ZOMBIE_FIX_01
-					|| getChildByIndex(i).getTag() == TAG_ZOMBIE_FIX_02) {
+			if (getChildByIndex(i).getTag() == TAG_BUTCHER_01
+					|| getChildByIndex(i).getTag() == TAG_BUTCHER_02
+					|| getChildByIndex(i).getTag() == TAG_BUTCHER_FIX_01
+					|| getChildByIndex(i).getTag() == TAG_BUTCHER_FIX_02) {
 				zombieCount++;
 			}
 		}
@@ -596,7 +555,7 @@ public class MainScene extends KeyListenScene implements
 			sortChildren();
 			
 			//sound for a bad guy
-			zombieAppearSound.play();
+			butcherAppearSound.play();
 
 			//clignotement
 			bad.registerEntityModifier(	new LoopEntityModifier(
@@ -607,7 +566,7 @@ public class MainScene extends KeyListenScene implements
 			));
 
 			// 配列に追加
-			zombieArray.add(bad);
+			butchersArray.add(bad);
 			
 		}
 		
@@ -622,20 +581,20 @@ public class MainScene extends KeyListenScene implements
 	/* 敵を生成 */
 	private AnimatedSprite getABadGuy(){
 		
-		AnimatedSprite zombieSprite;
+		AnimatedSprite butcherSprite;
 		int r = (int) (Math.random() * 10);
 		
 		if (r > 7) {
 			// 速いやつ
-			zombieSprite = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher2.png", 1, 2);
-			zombieSprite.setTag(TAG_ZOMBIE_FIX_02);
+			butcherSprite = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher2.png", 1, 2);
+			butcherSprite.setTag(TAG_BUTCHER_FIX_02);
 		} else  {
 			// 遅いやつ
-			zombieSprite = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher.png", 1, 2);
-			zombieSprite.setTag(TAG_ZOMBIE_FIX_01);
+			butcherSprite = getBaseActivity().getResourceUtil().getAnimatedSprite("boucher.png", 1, 2);
+			butcherSprite.setTag(TAG_BUTCHER_FIX_01);
 		} 
 		
-		return zombieSprite;
+		return butcherSprite;
 	}
 	
 	
@@ -734,8 +693,8 @@ public class MainScene extends KeyListenScene implements
 
 			//animation
 			final Sprite weaponSprite = new Sprite(0, 0, weaponTextureArray[0],	getBaseActivity().getVertexBufferObjectManager());
-			weaponSprite.setPosition(boySprite.getX() + boySprite.getWidth()/ 2 - weaponSprite.getWidth() / 2, boySprite.getY()
-					+ boySprite.getHeight() / 2 - weaponSprite.getHeight() / 2);
+			weaponSprite.setPosition(porcSprite.getX() + porcSprite.getWidth()/ 2 - weaponSprite.getWidth() / 2, porcSprite.getY()
+					+ porcSprite.getHeight() / 2 - weaponSprite.getHeight() / 2);
 			weaponSprite.setZIndex(zIndexItem);
 			weaponSprite.setBlendFunction(GL10.GL_SRC_ALPHA,GL10.GL_ONE_MINUS_SRC_ALPHA);
 			weaponSprite.setAlpha(0);
@@ -766,12 +725,12 @@ public class MainScene extends KeyListenScene implements
 				switch (i) {
 				case 0:
 					weaponSprite.setPosition(
-							boySprite.getX() + boySprite.getWidth() / 2
+							porcSprite.getX() + porcSprite.getWidth() / 2
 									- weaponSprite.getWidth() / 2, 0);
 					break;
 				case 1:
 					weaponSprite.setPosition(0,
-							boySprite.getY() + boySprite.getHeight() / 2
+							porcSprite.getY() + porcSprite.getHeight() / 2
 									- weaponSprite.getHeight() / 2);
 					break;
 				}
@@ -797,31 +756,30 @@ public class MainScene extends KeyListenScene implements
 			}
 		}
 		
-		// 画面から削除されたゾンビを格納する配列
-		final ArrayList<AnimatedSprite> detachedZombieArray = new ArrayList<AnimatedSprite>();
+		// 画面から削除された敵を格納する配列
+		final ArrayList<AnimatedSprite> detachedButchersArray = new ArrayList<AnimatedSprite>();
 		
-		// 衝突判定、ゾンビを消す
+		// 衝突判定、敵を消す
 		for (Sprite weapon : weaponSpriteArray) {
 			
-			for (int i = 0; i < zombieArray.size(); i++) {
+			for (int i = 0; i < butchersArray.size(); i++) {
 				
-				//only for zombies moving
-				if(zombieArray.get(i).getTag() != TAG_ZOMBIE_FIX_01 &&  zombieArray.get(i).getTag() != TAG_ZOMBIE_FIX_02){
+				if(butchersArray.get(i).getTag() != TAG_BUTCHER_FIX_01 &&  butchersArray.get(i).getTag() != TAG_BUTCHER_FIX_02){
 				
-					final AnimatedSprite zombie = zombieArray.get(i);
+					final AnimatedSprite butcher = butchersArray.get(i);
 					
-					if (zombie.collidesWith(weapon)) {
+					if (butcher.collidesWith(weapon)) {
 						// 既に追加済みでなければ配列に格納
-						if (!detachedZombieArray.contains(zombie)) {
-							detachedZombieArray.add(zombie);
+						if (!detachedButchersArray.contains(butcher)) {
+							detachedButchersArray.add(butcher);
 						}
-						// ゾンビをフェードアウト
-						zombie.registerEntityModifier(new FadeOutModifier(0.7f));
+						// 敵をフェードアウト
+						butcher.registerEntityModifier(new FadeOutModifier(0.7f));
 						registerUpdateHandler(new TimerHandler(0.8f,
 								new ITimerCallback() {
 									public void onTimePassed(
 											TimerHandler pTimerHandler) {
-										zombie.detachSelf();
+										butcher.detachSelf();
 									}
 								}));
 					}
@@ -829,13 +787,13 @@ public class MainScene extends KeyListenScene implements
 			}
 		}
 
-		// 一回の攻撃で複数のゾンビを倒した時はコンボボーナスを与える
-		if (detachedZombieArray.size() > 1) {
+		// 一回の攻撃で複数の敵を倒した時はコンボボーナスを与える
+		if (detachedButchersArray.size() > 1) {
 			comboSound.play();
 			BitmapFont bitmapFont;
-			if (detachedZombieArray.size() == 2) {
+			if (detachedButchersArray.size() == 2) {
 				bitmapFont = comboBMFontArray[0];
-			} else if (detachedZombieArray.size() == 3) {
+			} else if (detachedButchersArray.size() == 3) {
 				bitmapFont = comboBMFontArray[1];
 			} else {
 				bitmapFont = comboBMFontArray[2];
@@ -844,10 +802,10 @@ public class MainScene extends KeyListenScene implements
 
 			// ビットマップフォントを元にスコアを表示
 			final Text comboText = new Text(0, 0, bitmapFont, "x"
-					+ detachedZombieArray.size(), 20, new TextOptions(
+					+ detachedButchersArray.size(), 20, new TextOptions(
 					HorizontalAlign.CENTER), getBaseActivity()
 					.getVertexBufferObjectManager());
-			comboText.setPosition(boySprite.getX(), boySprite.getY());
+			comboText.setPosition(porcSprite.getX(), porcSprite.getY());
 			attachChild(comboText);
 
 			// コンボのテキストを移動アニメーションさせる
@@ -856,7 +814,7 @@ public class MainScene extends KeyListenScene implements
 							.getX(), currentScoreText.getX(), comboText.getY(),
 							currentScoreText.getY(), EaseBackIn.getInstance()),
 					new FadeOutModifier(0.5f)));
-			final int multiplayer = detachedZombieArray.size();
+			final int multiplayer = detachedButchersArray.size();
 
 			// 得点にコンボ数を乗算し適用する
 			registerUpdateHandler(new TimerHandler(3, new ITimerCallback() {
@@ -867,9 +825,9 @@ public class MainScene extends KeyListenScene implements
 			}));
 		}
 
-		// 画面から削除されたゾンビを配列から削除
-		for (AnimatedSprite zombie : detachedZombieArray) {
-			zombieArray.remove(zombie);
+		// 画面から削除された敵を配列から削除
+		for (AnimatedSprite butcher : detachedButchersArray) {
+			butchersArray.remove(butcher);
 		}
 	}
 
@@ -902,14 +860,14 @@ public class MainScene extends KeyListenScene implements
 		sortChildren();
 
 		// 主人公を縮小しながらフェードアウト
-		boySprite.registerEntityModifier(new ParallelEntityModifier(
+		porcSprite.registerEntityModifier(new ParallelEntityModifier(
 				new ScaleModifier(0.7f, 1f, 0.0f), 
 				new FadeOutModifier(0.7f)
 		));
 		
 		//stop movement of enemies
-		for(int i=0; i <zombieArray.size();i++){
-			zombieArray.get(0).stopAnimation();
+		for(int i=0; i <butchersArray.size();i++){
+			butchersArray.get(0).stopAnimation();
 		}
 
 		// 全てのアップデートハンドラを削除
@@ -1070,8 +1028,8 @@ public class MainScene extends KeyListenScene implements
 //					for (int i = 0; i < zombieArray.size(); i++) {
 //						AnimatedSprite zombie = zombieArray.get(i);
 //
-//						if (zombie.getTag() == TAG_ZOMBIE_01
-//								|| zombie.getTag() == TAG_ZOMBIE_02) {
+//						if (zombie.getTag() == TAG_BUTCHER_01
+//								|| zombie.getTag() == TAG_BUTCHER_02) {
 //							float[] zombieXY = { zombie.getX(), zombie.getY() };
 //							float[] boyXY = { boySprite.getX(),
 //									boySprite.getY() };
@@ -1091,7 +1049,7 @@ public class MainScene extends KeyListenScene implements
 //							// 向きを変更
 //							zombie.setRotation((float) angle);
 //
-//						} else if (zombie.getTag() == TAG_ZOMBIE_03) {
+//						} else if (zombie.getTag() == TAG_BUTCHER_03) {
 //							zombie.setRotation(zombie.getRotation() + 1);
 //						}
 //					}
